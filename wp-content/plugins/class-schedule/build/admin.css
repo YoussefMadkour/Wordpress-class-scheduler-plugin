@@ -25,6 +25,21 @@
 .cs-bulk-label { display: block; font-weight: 600; margin: 8px 0 4px; }
 .cs-bulk-textarea { width: 100%; min-height: 100px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px; }
 
+/* Toolbar */
+.cs-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; align-items: center; }
+.cs-toolbar select, .cs-toolbar input { border: 1px solid #e5e7eb; border-radius: 6px; padding: 6px 8px; }
+.cs-toolbar button { padding: 6px 10px; border: 1px solid #e5e7eb; background: #fff; border-radius: 6px; cursor: pointer; }
+
+/* Day sections */
+.cs-day { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; margin: 12px 0; }
+.cs-day h3 { margin: 0 0 8px; }
+.cs-day.cs-collapsed { opacity: 0.85; }
+.cs-collapsed-hint { color: #64748b; font-size: 12px; margin: 6px 0 0; }
+
+/* Inline edit */
+.cs-item.cs-item-editing { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 8px; border-radius: 6px; }
+.cs-item.cs-item-editing input, .cs-item.cs-item-editing select { margin: 4px 6px 4px 0; padding: 6px 8px; }
+
 @media (max-width: 1024px) { .class-schedule-admin .cs-list { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { 
   .class-schedule-admin .cs-list { grid-template-columns: 1fr; } 

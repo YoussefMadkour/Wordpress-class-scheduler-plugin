@@ -36,6 +36,41 @@
 
   let items = [];
   let locations = [];
+  let editingId = null;
+  let filters = { location: '', day: '', query: '' };
+  const collapsedDays = new Set();
+
+  function renderToolbar(){
+    const bar = h('div', { class: 'cs-toolbar' });
+
+    const daySel = h('select');
+    daySel.appendChild(h('option', { value: '', text: 'All days' }));
+    dayOrder.forEach(d => daySel.appendChild(h('option', { value: d, text: dayLabels[d] })));
+    daySel.value = filters.day;
+    daySel.addEventListener('change', ()=>{ filters.day = daySel.value; render(); });
+
+    const locSel = h('select');
+    locSel.appendChild(h('option', { value: '', text: 'All locations' }));
+    locations.forEach(loc => locSel.appendChild(h('option', { value: loc.id, text: loc.name })));
+    locSel.value = filters.location;
+    locSel.addEventListener('change', ()=>{ filters.location = locSel.value; render(); });
+
+    const search = h('input', { placeholder: 'Search title or instructor…' });
+    search.value = filters.query;
+    search.addEventListener('input', ()=>{ filters.query = search.value.trim().toLowerCase(); render(); });
+
+    const clearBtn = h('button', { type: 'button', text: 'Clear' });
+    clearBtn.addEventListener('click', ()=>{ filters = { location:'', day:'', query:'' }; render(); });
+
+    const expandBtn = h('button', { type: 'button', text: 'Expand all' });
+    expandBtn.addEventListener('click', ()=>{ collapsedDays.clear(); render(); });
+
+    const collapseBtn = h('button', { type: 'button', text: 'Collapse all' });
+    collapseBtn.addEventListener('click', ()=>{ dayOrder.forEach(d=>collapsedDays.add(d)); render(); });
+
+    [daySel, locSel, search, clearBtn, expandBtn, collapseBtn].forEach(el => bar.appendChild(el));
+    return bar;
+  }
 
   function renderBulkImport() {
     const section = h('div', { class: 'cs-bulk-import' });
@@ -206,7 +241,7 @@
     root.innerHTML = '';
     const form = h('form', { class: 'cs-form' });
     const inputTitle = h('input', { placeholder: 'Class title', required: 'true' });
-    const inputInstructor = h('input', { placeholder: 'Instructor', required: 'true' });
+    const inputInstructor = h('input', { placeholder: 'Instructor (optional)' });
     const selectDay = h('select');
     dayOrder.forEach(d => selectDay.appendChild(h('option', { value: d, text: dayLabels[d] })));
     const selectLocation = h('select');
@@ -227,53 +262,100 @@
 
     const list = h('div', { class: 'cs-list' });
     const byDay = { mon:[],tue:[],wed:[],thu:[],fri:[],sat:[],sun:[] };
-    items.forEach(it => byDay[it.day] && byDay[it.day].push(it));
+    const filtered = items.filter(it => {
+      if (filters.location && it.location !== filters.location) return false;
+      if (filters.day && it.day !== filters.day) return false;
+      if (filters.query) {
+        const q = filters.query;
+        const inTitle = (it.title||'').toLowerCase().includes(q);
+        const inInstr = (it.instructor||'').toLowerCase().includes(q);
+        if (!inTitle && !inInstr) return false;
+      }
+      return true;
+    });
+    filtered.forEach(it => byDay[it.day] && byDay[it.day].push(it));
     dayOrder.forEach(d => byDay[d].sort((a,b)=>a.start.localeCompare(b.start)));
 
     dayOrder.forEach(function(day){
-      const box = h('div', { class: 'cs-day' });
-      box.appendChild(h('h3', { text: dayLabels[day] }));
+      const box = h('div', { class: 'cs-day' + (collapsedDays.has(day) ? ' cs-collapsed' : '') });
+      const header = h('h3', { text: dayLabels[day] });
+      header.style.cursor = 'pointer';
+      header.addEventListener('click', ()=>{
+        if (collapsedDays.has(day)) collapsedDays.delete(day); else collapsedDays.add(day);
+        render();
+      });
+      box.appendChild(header);
       const listForDay = byDay[day];
       if(listForDay.length === 0){
         box.appendChild(h('p', { class: 'cs-empty', text: 'No classes' }));
       } else {
+        if (collapsedDays.has(day)) {
+          box.appendChild(h('p', { class: 'cs-collapsed-hint', text: listForDay.length + ' classes' }));
+          list.appendChild(box);
+          return;
+        }
         listForDay.forEach(function(it){
-          const row = h('div', { class: 'cs-item' });
-          row.appendChild(h('div', { class: 'cs-item-title', text: it.title }));
-          const metaText = (it.instructor ? it.instructor + ' — ' : '') + it.start + '–' + it.end;
-          row.appendChild(h('div', { class: 'cs-item-meta', text: metaText }));
-          if(it.location) row.appendChild(h('div', { class: 'cs-item-location', text: 'Location: ' + it.location }));
-          const actions = h('div', { class: 'cs-actions' });
-          const btnDel = h('button', { type: 'button', text: 'Delete' });
-          btnDel.addEventListener('click', function(){
-            items = items.filter(x => x.id !== it.id);
-            saveSchedule(items).then(()=>render());
-          });
-          const btnEdit = h('button', { type: 'button', text: 'Edit' });
-          btnEdit.addEventListener('click', function(){
-            const nt = prompt('Title', it.title) || it.title;
-            const ni = prompt('Instructor (leave empty if none)', it.instructor || '') || '';
-            const dayOptions = 'Saturday(sat), Sunday(sun), Monday(mon), Tuesday(tue), Wednesday(wed), Thursday(thu), Friday(fri)';
-            const nd = prompt('Day (' + dayOptions + ')', it.day) || it.day;
-            const ns = prompt('Start (HH:MM)', it.start) || it.start;
-            const ne = prompt('End (HH:MM)', it.end) || it.end;
-            
-            // Validate day
-            const validDays = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'];
-            const finalDay = validDays.includes(nd.toLowerCase()) ? nd.toLowerCase() : it.day;
-            
-            items = items.map(x => x.id === it.id ? Object.assign({}, x, { 
-              title: nt, 
-              instructor: ni.trim(), 
-              day: finalDay,
-              start: ns, 
-              end: ne 
-            }) : x);
-            saveSchedule(items).then(()=>render());
-          });
-          actions.appendChild(btnDel);
-          actions.appendChild(btnEdit);
-          row.appendChild(actions);
+          const isEditing = editingId === it.id;
+          const row = h('div', { class: 'cs-item' + (isEditing ? ' cs-item-editing' : '') });
+
+          if(!isEditing){
+            row.appendChild(h('div', { class: 'cs-item-title', text: it.title }));
+            const metaText = (it.instructor ? it.instructor + ' — ' : '') + it.start + '–' + it.end;
+            row.appendChild(h('div', { class: 'cs-item-meta', text: metaText }));
+            if(it.location) row.appendChild(h('div', { class: 'cs-item-location', text: 'Location: ' + it.location }));
+            const actions = h('div', { class: 'cs-actions' });
+            const btnDel = h('button', { type: 'button', text: 'Delete' });
+            btnDel.addEventListener('click', function(){
+              items = items.filter(x => x.id !== it.id);
+              saveSchedule(items).then(()=>render());
+            });
+            const btnEdit = h('button', { type: 'button', text: 'Edit' });
+            const btnDup = h('button', { type: 'button', text: 'Duplicate' });
+            btnEdit.addEventListener('click', function(){ editingId = it.id; render(); });
+            btnDup.addEventListener('click', function(){
+              const copy = { ...it, id: Math.random().toString(36).slice(2)+Date.now().toString(36) };
+              items = items.concat([copy]);
+              saveSchedule(items).then(()=>render());
+            });
+            actions.appendChild(btnDel);
+            actions.appendChild(btnEdit);
+            actions.appendChild(btnDup);
+            row.appendChild(actions);
+          } else {
+            const titleInput = h('input', { value: it.title, placeholder: 'Title' });
+            const instrInput = h('input', { value: it.instructor || '', placeholder: 'Instructor (optional)' });
+            const daySel = h('select');
+            dayOrder.forEach(d => daySel.appendChild(h('option', { value: d, text: dayLabels[d] })));
+            daySel.value = it.day;
+            const locSel = h('select');
+            locations.forEach(loc => locSel.appendChild(h('option', { value: loc.id, text: loc.name })));
+            locSel.value = it.location || '';
+            const startInput = h('input', { type: 'time', value: it.start });
+            const endInput = h('input', { type: 'time', value: it.end });
+            const actions = h('div', { class: 'cs-actions' });
+            const saveBtn = h('button', { type: 'button', text: 'Save' });
+            const cancelBtn = h('button', { type: 'button', text: 'Cancel' });
+            saveBtn.addEventListener('click', function(){
+              const updated = {
+                ...it,
+                title: titleInput.value.trim() || it.title,
+                instructor: (instrInput.value||'').trim(),
+                day: daySel.value,
+                location: locSel.value,
+                start: startInput.value || it.start,
+                end: endInput.value || it.end
+              };
+              items = items.map(x => x.id === it.id ? updated : x);
+              editingId = null;
+              saveSchedule(items).then(()=>render());
+            });
+            cancelBtn.addEventListener('click', function(){ editingId = null; render(); });
+            [titleInput, instrInput, daySel, locSel, startInput, endInput].forEach(el => row.appendChild(el));
+            actions.appendChild(saveBtn);
+            actions.appendChild(cancelBtn);
+            row.appendChild(actions);
+          }
+
           box.appendChild(row);
         });
       }
@@ -281,6 +363,7 @@
     });
 
     root.appendChild(renderLocationManager());
+    root.appendChild(renderToolbar());
     root.appendChild(renderBulkImport());
     root.appendChild(form);
     root.appendChild(list);
