@@ -1,0 +1,11 @@
+.class-schedule-admin .cs-form { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 8px; margin: 16px 0; }
+.class-schedule-admin .cs-list { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+.class-schedule-admin .cs-day { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; }
+.class-schedule-admin .cs-item { border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px; margin: 6px 0; background: #f9fafb; }
+.class-schedule-admin .cs-item-title { font-weight: 700; }
+.class-schedule-admin .cs-item-meta { color: #475569; font-size: 12px; }
+.class-schedule-admin .cs-actions { display: flex; gap: 6px; margin-top: 6px; }
+@media (max-width: 1024px) { .class-schedule-admin .cs-list { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .class-schedule-admin .cs-list { grid-template-columns: 1fr; } .class-schedule-admin .cs-form { grid-template-columns: 1fr; } }
+
+
