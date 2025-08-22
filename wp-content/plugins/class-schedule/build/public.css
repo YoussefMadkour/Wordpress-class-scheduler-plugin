@@ -151,7 +151,7 @@
 .cs-time-label { color:#B2ACA8; font-weight:700; font-size:12px; }
 
 /* Slots: one per grid cell */
-.cs-slot { background:#0a0a0a; border-left:1px dashed #2D2822; border-bottom:1px dashed #2D2822; padding:0; display:flex; align-items:stretch; justify-content:stretch; }
+.cs-slot { background:#0a0a0a; border-left:1px dashed #2D2822; border-bottom:1px dashed #2D2822; padding:0; display:flex; align-items:center; justify-content:center; }
 
 /* Friday OFF styling */
 .cs-slot-off { background:#1a1a1a; opacity:0.6; align-items:center; }
