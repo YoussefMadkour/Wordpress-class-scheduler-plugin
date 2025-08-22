@@ -1,6 +1,6 @@
 /*! Frontend renderer - Vanilla JS (grid with time slots + mobile view + locations) */
 (function(){
-  const API_ROOT = (window.CLASS_SCHEDULE_CONFIG && window.CLASS_SCHEDULE_CONFIG.root) || '/wp-json/class-schedule/v1/';
+  const API_ROOT = (window.CLASS_SCHEDULE_CONFIG && window.CLASS_SCHEDULE_CONFIG.root) || '/?rest_route=/class-schedule/v1/';
   const mounts = window.ClassScheduleMounts || [];
   
   let currentLocation = null;
@@ -19,14 +19,13 @@
 
   const dayLabels={sat:'Saturday',sun:'Sunday',mon:'Monday',tue:'Tuesday',wed:'Wednesday',thu:'Thursday',fri:'Friday'};
   const dayOrder=['sat','sun','mon','tue','wed','thu','fri'];
+  // Time slots used to place tiles on the grid. Adjusted to evening bands to match your data.
   const slots=[
-    {start:'06:00', end:'08:00', label:'06.00 - 08.00'},
-    {start:'08:00', end:'10:00', label:'08.00 - 10.00'},
-    {start:'10:00', end:'12:00', label:'10.00 - 12.00'},
-    {start:'12:00', end:'14:00', label:'12.00 - 14.00'},
-    {start:'14:00', end:'16:00', label:'14.00 - 16.00'},
-    {start:'16:00', end:'18:00', label:'16.00 - 18.00'},
-    {start:'18:00', end:'20:00', label:'18.00 - 20.00'},
+    {start:'18:00', end:'19:00', label:'18.00 - 19.00'},
+    {start:'19:00', end:'20:00', label:'19.00 - 20.00'},
+    {start:'20:00', end:'21:00', label:'20.00 - 21.00'},
+    {start:'20:30', end:'21:30', label:'20.30 - 21.30'},
+    {start:'21:00', end:'22:00', label:'21.00 - 22.00'},
   ];
 
   function findSlotIndex(item){
@@ -34,6 +33,15 @@
       if(item.start===slots[i].start && item.end===slots[i].end) return i;
     }
     return -1;
+  }
+
+  function formatTimeLabel(time){
+    // time is HH:MM in 24-hour, return h:MM AM/PM
+    const [hStr, m] = time.split(':');
+    let h = parseInt(hStr, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12; if (h === 0) h = 12;
+    return h + ':' + m + ' ' + ampm;
   }
 
   function renderGrid(container, items){
@@ -50,7 +58,8 @@
 
     // For each time slot, add time label + day cells
     slots.forEach((slot)=>{
-      grid.appendChild(h('div',{class:'cs-time-cell'}, [h('div',{class:'cs-time-label', text: slot.label})]));
+      const timeLabel = formatTimeLabel(slot.start) + ' - ' + formatTimeLabel(slot.end);
+      grid.appendChild(h('div',{class:'cs-time-cell'}, [h('div',{class:'cs-time-label', text: timeLabel})]));
       dayOrder.forEach(d=>{
         const cell=h('div',{class:'cs-slot'});
         
@@ -64,7 +73,7 @@
             const tile=h('div',{class:'cs-tile'});
             tile.appendChild(h('div',{class:'cs-tile-title', text: (it.title||'').toUpperCase()}));
             if(it.instructor) tile.appendChild(h('div',{class:'cs-tile-sub', text: it.instructor}));
-            tile.appendChild(h('div',{class:'cs-tile-time', text: it.start+'–'+it.end}));
+            tile.appendChild(h('div',{class:'cs-tile-time', text: formatTimeLabel(it.start)+'–'+formatTimeLabel(it.end)}));
             cell.appendChild(tile);
           });
         }
@@ -91,7 +100,7 @@
           const tile=h('div',{class:'cs-tile'});
           tile.appendChild(h('div',{class:'cs-tile-title',text:(it.title||'').toUpperCase()}));
           if(it.instructor) tile.appendChild(h('div',{class:'cs-tile-sub',text:it.instructor}));
-          tile.appendChild(h('div',{class:'cs-tile-time',text:it.start+'–'+it.end}));
+          tile.appendChild(h('div',{class:'cs-tile-time',text:formatTimeLabel(it.start)+'–'+formatTimeLabel(it.end)}));
           list.appendChild(tile);
         });
       }
@@ -142,15 +151,19 @@
     currentLocation = locationId;
     container.innerHTML = '<div class="cs-loading">Loading…</div>';
     
-    const url = API_ROOT + 'schedule' + (locationId ? '?location=' + encodeURIComponent(locationId) : '');
+    // Always fetch full schedule; filter client-side for robustness
+    const url = API_ROOT + 'schedule';
     fetch(url)
       .then(r => r.json())
       .then(data => {
+        const list = Array.isArray(data) ? data : [];
+        const filtered = currentLocation ? list.filter(it => it && it.location === currentLocation) : list;
         setTimeout(() => {
-          render(container, Array.isArray(data) ? data : []);
+          render(container, filtered);
         }, 200); // Small delay for smooth transition
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Failed to load schedule:', error);
         container.innerHTML = '<div>Failed to load schedule.</div>';
       });
   }
@@ -181,15 +194,18 @@
         allLocations = Array.isArray(locations) ? locations : [];
         currentLocation = allLocations.length > 0 ? allLocations[0].id : null;
         
-        // Load schedule for first location
-        const url = API_ROOT + 'schedule' + (currentLocation ? '?location=' + encodeURIComponent(currentLocation) : '');
+        // Load full schedule; we'll filter client-side
+        const url = API_ROOT + 'schedule';
         return fetch(url);
       })
       .then(r => r.json())
       .then(data => {
-        render(container, Array.isArray(data) ? data : []);
+        const list = Array.isArray(data) ? data : [];
+        const filtered = currentLocation ? list.filter(it => it && it.location === currentLocation) : list;
+        render(container, filtered);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Failed to load schedule:', error);
         container.innerHTML = '<div>Failed to load schedule.</div>';
       });
   }

@@ -1,10 +1,24 @@
 /* Class Schedule Wrapper */
 .class-schedule-wrapper {
-	background: #0b1426;
+	background: #0a0a0a;
 	padding: 40px 20px;
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	width: 100%;
 	box-sizing: border-box;
+}
+
+/* Remove any default focus/hover colors */
+.class-schedule-wrapper * {
+	outline: none;
+}
+
+.class-schedule-wrapper *:focus {
+	outline: none;
+}
+
+.class-schedule-wrapper button:focus,
+.class-schedule-wrapper button:hover {
+	outline: none;
 }
 
 /* Header Styling */
@@ -24,8 +38,8 @@
 
 .cs-nav-arrow {
 	background: transparent;
-	border: 2px solid #374151;
-	color: #e2e8f0;
+	border: 2px solid #F27C00;
+	color: #F27C00;
 	border-radius: 50%;
 	width: 48px;
 	height: 48px;
@@ -39,9 +53,10 @@
 }
 
 .cs-nav-arrow:hover {
-	border-color: #ff6b35;
-	color: #ff6b35;
+	border-color: #FBA743;
+	color: #FBA743;
 	transform: scale(1.1);
+	background: rgba(251, 167, 67, 0.1);
 }
 
 .cs-location-display {
@@ -50,9 +65,10 @@
 }
 
 .cs-location-name {
-	color: #ffffff;
+	color: #F5F5F5;
 	font-size: 24px;
 	font-weight: 800;
+	font-family: 'Anton', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 	text-transform: uppercase;
 	letter-spacing: 2px;
 }
@@ -69,7 +85,7 @@
 }
 
 .class-schedule-header .subtitle {
-	color: #ff6b35;
+	color: #F27C00;
 	text-transform: uppercase;
 	letter-spacing: 2px;
 	font-weight: 600;
@@ -78,9 +94,10 @@
 }
 
 .class-schedule-header .title {
-	color: #ffffff;
+	color: #F5F5F5;
 	text-transform: uppercase;
 	font-weight: 900;
+	font-family: 'Anton', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 	letter-spacing: 3px;
 	font-size: 32px;
 	margin: 0;
@@ -101,8 +118,8 @@
 	display: grid;
 	grid-template-columns: 160px repeat(7, 1fr);
 	width: 100%;
-	background: #0b1426;
-	border: 1px solid #142132;
+	background: #161616;
+	border: 1px solid #2D2822;
 	border-radius: 6px;
 	overflow: hidden;
 	/* grid layout: header row + time rows */
@@ -111,8 +128,8 @@
 
 /* Grid headers */
 .cs-header { 
-	background: #0f1b2b; 
-	border-bottom: 1px dashed #223246; 
+	background: #161616; 
+	border-bottom: 1px dashed #2D2822; 
 	display: flex; 
 	align-items: center; 
 	justify-content: center; 
@@ -120,9 +137,9 @@
 	white-space: nowrap;
 	overflow: hidden;
 }
-.cs-time-header { border-right: 1px dashed #223246; }
+.cs-time-header { border-right: 1px dashed #2D2822; }
 .cs-day-header { 
-	color: #e2e8f0; 
+	color: #EDE2D0; 
 	font-weight: 700; 
 	text-transform: uppercase; 
 	letter-spacing: 1px; 
@@ -130,27 +147,38 @@
 }
 
 /* Time cells */
-.cs-time-cell { background:#0f1b2b; border-right:1px dashed #223246; display:flex; align-items:center; justify-content:center; }
-.cs-time-label { color:#7b93aa; font-weight:700; font-size:12px; }
+.cs-time-cell { background:#161616; border-right:1px dashed #2D2822; display:flex; align-items:center; justify-content:center; }
+.cs-time-label { color:#B2ACA8; font-weight:700; font-size:12px; }
 
 /* Slots: one per grid cell */
-.cs-slot { background:#132234; border-left:1px dashed #223246; border-bottom:1px dashed #223246; padding:12px; display:flex; align-items:flex-start; justify-content:center; }
+.cs-slot { background:#0a0a0a; border-left:1px dashed #2D2822; border-bottom:1px dashed #2D2822; padding:0; display:flex; align-items:stretch; justify-content:stretch; }
+
+/* Friday OFF styling */
+.cs-slot-off { background:#1a1a1a; opacity:0.6; align-items:center; }
+.cs-off-label { color:#6b7280; font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:1px; }
 
 /* Remove old column styles */
 .cs-col, .cs-times, .cs-time, .cs-col-body { display:none; }
 
 /* Class Tiles */
 .cs-tile {
-	background: #d4af7a;
-	color: #1f2937;
-	border-radius: 4px;
-	padding: 10px 12px;
+	background: #F27C00;
+	color: #ffffff;
+	border: none;
+	border-radius: 0;
+	padding: 12px 8px;
 	text-align: center;
-	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 }
 
 .cs-tile-title {
 	font-weight: 800;
+	font-family: 'Anton', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 	text-transform: uppercase;
 	font-size: 13px;
 	line-height: 1.2;
@@ -161,22 +189,54 @@
 .cs-tile-sub {
 	font-size: 11px;
 	font-weight: 500;
-	opacity: 0.8;
+	opacity: 0.9;
 	margin-bottom: 2px;
 }
 
 .cs-tile-time {
 	font-size: 10px;
-	opacity: 0.7;
-	font-weight: 400;
+	opacity: 0.9;
+	font-weight: 700;
+	color: #ffffff;
+	display: none; /* Hide on desktop - time is shown in left column */
 }
 
 /* Mobile stacked view */
 .cs-mobile { display:none; }
 .cs-mobile-day { margin-top:16px; }
-.cs-mobile-day-title { color:#e2e8f0; font-weight:800; letter-spacing:1px; text-transform:uppercase; margin:8px 0; }
+.cs-mobile-day-title { color:#EDE2D0; font-weight:800; letter-spacing:1px; text-transform:uppercase; margin:8px 0; font-family: 'Anton', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; }
 .cs-mobile-list { display:grid; gap:8px; }
-.cs-mobile-empty { color:#94a3b8; font-size:13px; }
+.cs-mobile-empty { color:#B2ACA8; font-size:13px; }
+
+/* Mobile tiles styling */
+.cs-mobile .cs-tile {
+	background: #F27C00;
+	color: #ffffff;
+	border: none;
+	border-radius: 0;
+	padding: 16px;
+	text-align: left;
+	width: 100%;
+	box-sizing: border-box;
+	margin-bottom: 4px;
+}
+
+.cs-mobile .cs-tile-title {
+	font-size: 16px;
+	margin-bottom: 6px;
+}
+
+.cs-mobile .cs-tile-sub {
+	font-size: 14px;
+	margin-bottom: 4px;
+}
+
+.cs-mobile .cs-tile-time {
+	font-size: 12px;
+	font-weight: 700;
+	opacity: 1;
+	display: block; /* Show on mobile */
+}
 
 /* Responsive Design */
 @media (max-width: 1024px) {

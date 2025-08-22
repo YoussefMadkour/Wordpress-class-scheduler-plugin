@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Class Schedule
  * Description: Dynamic weekly class schedule with admin CRUD and shortcode/block renderer.
- * Version: 0.1.7
+ * Version: 0.1.9
  * Author: ZakFit
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-define('CLASS_SCHEDULE_VERSION', '0.1.7');
+define('CLASS_SCHEDULE_VERSION', '0.1.9');
 define('CLASS_SCHEDULE_PLUGIN_FILE', __FILE__);
 define('CLASS_SCHEDULE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('CLASS_SCHEDULE_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -26,9 +26,8 @@ register_activation_hook(__FILE__, function () {
 	}
 	if (get_option('class_schedule_locations') === false) {
 		$default_locations = [
-			['id' => 'main', 'name' => 'Main Gym', 'slug' => 'main'],
-			['id' => 'core', 'name' => 'Core', 'slug' => 'core'],
-			['id' => 'arena', 'name' => 'GoFit Arena', 'slug' => 'arena']
+			['id' => 'zayed-dunes', 'name' => 'EDGEFIT (zayed-dunes)', 'slug' => 'zayed-dunes'],
+			['id' => 'wcc-beverly-hills', 'name' => 'CORE (wcc--beverly-hills)', 'slug' => 'wcc-beverly-hills']
 		];
 		update_option('class_schedule_locations', wp_json_encode($default_locations));
 	}
@@ -61,9 +60,14 @@ add_action('admin_enqueue_scripts', function ($hook) {
 	if ($hook !== 'toplevel_page_class-schedule') {
 		return;
 	}
-	// Placeholder CSS to ensure basic styling before build is wired
-	wp_enqueue_style('class-schedule-admin', CLASS_SCHEDULE_PLUGIN_URL . 'build/admin.css', ['wp-components'], CLASS_SCHEDULE_VERSION);
-	wp_enqueue_script('class-schedule-admin', CLASS_SCHEDULE_PLUGIN_URL . 'build/admin.js', ['wp-element', 'wp-components', 'wp-i18n', 'wp-api-fetch'], CLASS_SCHEDULE_VERSION, true);
+	// Cache-bust using file modification time
+	$admin_css_path = CLASS_SCHEDULE_PLUGIN_DIR . 'build/admin.css';
+	$admin_js_path  = CLASS_SCHEDULE_PLUGIN_DIR . 'build/admin.js';
+	$admin_css_ver  = file_exists($admin_css_path) ? filemtime($admin_css_path) : CLASS_SCHEDULE_VERSION;
+	$admin_js_ver   = file_exists($admin_js_path) ? filemtime($admin_js_path) : CLASS_SCHEDULE_VERSION;
+
+	wp_enqueue_style('class-schedule-admin', CLASS_SCHEDULE_PLUGIN_URL . 'build/admin.css', ['wp-components'], $admin_css_ver);
+	wp_enqueue_script('class-schedule-admin', CLASS_SCHEDULE_PLUGIN_URL . 'build/admin.js', ['wp-element', 'wp-components', 'wp-i18n', 'wp-api-fetch'], $admin_js_ver, true);
 	wp_localize_script('class-schedule-admin', 'CLASS_SCHEDULE_CONFIG', [
 		'root' => esc_url_raw(rest_url('class-schedule/v1/')),
 		'nonce' => wp_create_nonce('wp_rest'),
@@ -72,10 +76,16 @@ add_action('admin_enqueue_scripts', function ($hook) {
 
 // Public enqueue
 add_action('wp_enqueue_scripts', function () {
-	wp_enqueue_style('class-schedule-public', CLASS_SCHEDULE_PLUGIN_URL . 'build/public.css', [], CLASS_SCHEDULE_VERSION);
-	wp_enqueue_script('class-schedule-public', CLASS_SCHEDULE_PLUGIN_URL . 'build/public.js', [], CLASS_SCHEDULE_VERSION, true);
+	// Cache-bust using file modification time
+	$public_css_path = CLASS_SCHEDULE_PLUGIN_DIR . 'build/public.css';
+	$public_js_path  = CLASS_SCHEDULE_PLUGIN_DIR . 'build/public.js';
+	$public_css_ver  = file_exists($public_css_path) ? filemtime($public_css_path) : CLASS_SCHEDULE_VERSION;
+	$public_js_ver   = file_exists($public_js_path) ? filemtime($public_js_path) : CLASS_SCHEDULE_VERSION;
+
+	wp_enqueue_style('class-schedule-public', CLASS_SCHEDULE_PLUGIN_URL . 'build/public.css', [], $public_css_ver);
+	wp_enqueue_script('class-schedule-public', CLASS_SCHEDULE_PLUGIN_URL . 'build/public.js', [], $public_js_ver, true);
 	wp_localize_script('class-schedule-public', 'CLASS_SCHEDULE_CONFIG', [
-		'root' => esc_url_raw(rest_url('class-schedule/v1/')),
+		'root' => '/?rest_route=/class-schedule/v1/',
 	]);
 });
 

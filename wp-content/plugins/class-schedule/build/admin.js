@@ -3,7 +3,7 @@
   const root = document.getElementById('class-schedule-admin-app');
   if(!root) return;
 
-  const API_ROOT = (window.CLASS_SCHEDULE_CONFIG && window.CLASS_SCHEDULE_CONFIG.root) || '/wp-json/class-schedule/v1/';
+  const API_ROOT = (window.CLASS_SCHEDULE_CONFIG && window.CLASS_SCHEDULE_CONFIG.root) || '/?rest_route=/class-schedule/v1/';
   const NONCE = (window.CLASS_SCHEDULE_CONFIG && window.CLASS_SCHEDULE_CONFIG.nonce) || '';
 
   function h(tag, attrs, children){
@@ -37,6 +37,93 @@
   let items = [];
   let locations = [];
 
+  function renderBulkImport() {
+    const section = h('div', { class: 'cs-bulk-import' });
+    section.appendChild(h('h3', { text: 'Bulk Import' }));
+
+    const helper = h('div', { class: 'cs-bulk-help' }, [
+      h('div', { text: 'Paste CSV (one item per line). Examples:' }),
+      h('pre', {}, [
+        'Locations: name,slug\n',
+        'EDGEFIT,zayed-dunes\n',
+        'CORE,woc--beverly-hills\n\n',
+        'Classes: title,instructor,day(start mon..sun),locationId,start,end\n',
+        'Zak,moh,sat,zayed-dunes,06:00,08:00\n'
+      ])
+    ]);
+
+    const locLabel = h('label', { class: 'cs-bulk-label', text: 'Locations CSV' });
+    const locArea = h('textarea', { class: 'cs-bulk-textarea', placeholder: 'name,slug' });
+    const clsLabel = h('label', { class: 'cs-bulk-label', text: 'Classes CSV' });
+    const clsArea = h('textarea', { class: 'cs-bulk-textarea', placeholder: 'title,instructor,day,locationId,start,end' });
+    const importBtn = h('button', { type: 'button', text: 'Import' });
+
+    importBtn.addEventListener('click', () => {
+      const dayMap = { saturday: 'sat', sunday: 'sun', monday: 'mon', tuesday: 'tue', wednesday: 'wed', thursday: 'thu', friday: 'fri', sat:'sat', sun:'sun', mon:'mon', tue:'tue', wed:'wed', thu:'thu', fri:'fri' };
+
+      // Parse locations
+      const locLines = locArea.value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+      const newLocs = [];
+      locLines.forEach(line => {
+        const parts = line.split(',').map(s => s.trim());
+        if (parts.length >= 2) {
+          const name = parts[0];
+          const slug = parts[1].toLowerCase().replace(/[^a-z0-9-]/g, '-');
+          newLocs.push({ id: slug, name, slug });
+        }
+      });
+
+      if (newLocs.length) {
+        // Merge by id, overwrite existing
+        const map = Object.fromEntries(locations.map(l=>[l.id,l]));
+        newLocs.forEach(l => { map[l.id] = l; });
+        locations = Object.values(map);
+      }
+
+      // Ensure locations from classes exist
+      const ensureLocation = (id) => {
+        if (!id) return;
+        if (!locations.some(l => l.id === id)) {
+          // Create name from id (humanize)
+          const name = id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+          locations = locations.concat([{ id, name, slug: id }]);
+        }
+      };
+
+      // Parse classes
+      const clsLines = clsArea.value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+      const newItems = [];
+      clsLines.forEach(line => {
+        const parts = line.split(',').map(s => s.trim());
+        if (parts.length >= 6) {
+          const [title, instructor, dayRaw, locationId, start, end] = parts;
+          const dayKey = dayMap[dayRaw.toLowerCase()];
+          if (!dayKey) return;
+          ensureLocation(locationId);
+          newItems.push({ id: Math.random().toString(36).slice(2)+Date.now().toString(36), title, instructor, day: dayKey, location: locationId, start, end });
+        }
+      });
+
+      if (newItems.length) {
+        // Append new classes
+        items = items.concat(newItems);
+      }
+
+      Promise.all([
+        saveLocations(locations),
+        saveSchedule(items)
+      ]).then(() => render());
+    });
+
+    section.appendChild(helper);
+    section.appendChild(locLabel);
+    section.appendChild(locArea);
+    section.appendChild(clsLabel);
+    section.appendChild(clsArea);
+    section.appendChild(importBtn);
+    return section;
+  }
+
   function renderLocationManager() {
     const section = h('div', { class: 'cs-location-manager' });
     section.appendChild(h('h3', { text: 'Manage Locations' }));
@@ -68,12 +155,36 @@
     locations.forEach(loc => {
       const item = h('div', { class: 'cs-location-item' });
       item.appendChild(h('span', { text: loc.name + ' (' + loc.id + ')' }));
+      
+      const actions = h('div', { class: 'cs-location-actions' });
+      
+      const btnEdit = h('button', { type: 'button', text: 'Edit' });
+      btnEdit.addEventListener('click', () => {
+        const newName = prompt('Location name:', loc.name);
+        const newSlug = prompt('Location slug:', loc.slug);
+        if (newName && newSlug) {
+          const updatedLocation = {
+            ...loc,
+            name: newName.trim(),
+            slug: newSlug.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
+            id: newSlug.toLowerCase().replace(/[^a-z0-9-]/g, '-')
+          };
+          locations = locations.map(l => l.id === loc.id ? updatedLocation : l);
+          saveLocations(locations).then(() => render());
+        }
+      });
+      
       const btnDelete = h('button', { type: 'button', text: 'Delete' });
       btnDelete.addEventListener('click', () => {
-        locations = locations.filter(l => l.id !== loc.id);
-        saveLocations(locations).then(() => render());
+        if (confirm('Are you sure you want to delete this location? All classes assigned to this location will remain but may not display correctly.')) {
+          locations = locations.filter(l => l.id !== loc.id);
+          saveLocations(locations).then(() => render());
+        }
       });
-      item.appendChild(btnDelete);
+      
+      actions.appendChild(btnEdit);
+      actions.appendChild(btnDelete);
+      item.appendChild(actions);
       locationsList.appendChild(item);
     });
     
@@ -108,7 +219,7 @@
     form.addEventListener('submit', function(e){
       e.preventDefault();
       const newItem = { id: Math.random().toString(36).slice(2)+Date.now().toString(36), title: inputTitle.value.trim(), instructor: inputInstructor.value.trim(), day: selectDay.value, location: selectLocation.value, start: inputStart.value, end: inputEnd.value };
-      if(!newItem.title || !newItem.instructor) return;
+      if(!newItem.title) return;
       items = items.concat([newItem]);
       saveSchedule(items).then(()=>render());
       form.reset();
@@ -129,7 +240,8 @@
         listForDay.forEach(function(it){
           const row = h('div', { class: 'cs-item' });
           row.appendChild(h('div', { class: 'cs-item-title', text: it.title }));
-          row.appendChild(h('div', { class: 'cs-item-meta', text: it.instructor + ' — ' + it.start + '–' + it.end }));
+          const metaText = (it.instructor ? it.instructor + ' — ' : '') + it.start + '–' + it.end;
+          row.appendChild(h('div', { class: 'cs-item-meta', text: metaText }));
           if(it.location) row.appendChild(h('div', { class: 'cs-item-location', text: 'Location: ' + it.location }));
           const actions = h('div', { class: 'cs-actions' });
           const btnDel = h('button', { type: 'button', text: 'Delete' });
@@ -140,10 +252,23 @@
           const btnEdit = h('button', { type: 'button', text: 'Edit' });
           btnEdit.addEventListener('click', function(){
             const nt = prompt('Title', it.title) || it.title;
-            const ni = prompt('Instructor', it.instructor) || it.instructor;
+            const ni = prompt('Instructor (leave empty if none)', it.instructor || '') || '';
+            const dayOptions = 'Saturday(sat), Sunday(sun), Monday(mon), Tuesday(tue), Wednesday(wed), Thursday(thu), Friday(fri)';
+            const nd = prompt('Day (' + dayOptions + ')', it.day) || it.day;
             const ns = prompt('Start (HH:MM)', it.start) || it.start;
             const ne = prompt('End (HH:MM)', it.end) || it.end;
-            items = items.map(x => x.id === it.id ? Object.assign({}, x, { title: nt, instructor: ni, start: ns, end: ne }) : x);
+            
+            // Validate day
+            const validDays = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'];
+            const finalDay = validDays.includes(nd.toLowerCase()) ? nd.toLowerCase() : it.day;
+            
+            items = items.map(x => x.id === it.id ? Object.assign({}, x, { 
+              title: nt, 
+              instructor: ni.trim(), 
+              day: finalDay,
+              start: ns, 
+              end: ne 
+            }) : x);
             saveSchedule(items).then(()=>render());
           });
           actions.appendChild(btnDel);
@@ -155,12 +280,22 @@
       list.appendChild(box);
     });
 
+    root.appendChild(renderLocationManager());
+    root.appendChild(renderBulkImport());
     root.appendChild(form);
     root.appendChild(list);
   }
 
   root.innerHTML = '<p>Loading…</p>';
-  fetchSchedule().then(function(data){ items = data; render(); });
+  // Load both schedule and locations
+  Promise.all([
+    fetchSchedule(),
+    fetch(window.CLASS_SCHEDULE_CONFIG.root + 'locations').then(r => r.json())
+  ]).then(function([scheduleData, locationsData]) {
+    items = Array.isArray(scheduleData) ? scheduleData : [];
+    locations = Array.isArray(locationsData) ? locationsData : [];
+    render();
+  });
 })();
 
 

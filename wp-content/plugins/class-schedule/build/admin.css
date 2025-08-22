@@ -1,4 +1,35 @@
-/* Placeholder; replaced by Vite build */
-@import url('../src/styles/admin.css');
+/* Admin styles */
+.class-schedule-admin .cs-form { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 8px; margin: 16px 0; }
+.class-schedule-admin .cs-list { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+.class-schedule-admin .cs-day { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; }
+.class-schedule-admin .cs-item { border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px; margin: 6px 0; background: #f9fafb; }
+.class-schedule-admin .cs-item-title { font-weight: 700; }
+.class-schedule-admin .cs-item-meta { color: #475569; font-size: 12px; }
+.class-schedule-admin .cs-item-location { color: #059669; font-size: 11px; font-weight: 600; }
+.class-schedule-admin .cs-actions { display: flex; gap: 6px; margin-top: 6px; }
+
+/* Location Manager */
+.cs-location-manager { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+.cs-location-manager h3 { margin: 0 0 12px 0; color: #374151; }
+.cs-location-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 16px; }
+.cs-locations-list { display: grid; gap: 8px; }
+.cs-location-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #fff; border-radius: 4px; }
+.cs-location-actions { display: flex; gap: 6px; }
+.cs-location-actions button { padding: 4px 8px; font-size: 12px; }
+
+/* Bulk Import */
+.cs-bulk-import { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 16px 0; }
+.cs-bulk-import h3 { margin: 0 0 12px 0; }
+.cs-bulk-help { font-size: 12px; color: #475569; margin-bottom: 12px; }
+.cs-bulk-help pre { background: #f8fafc; padding: 8px; overflow: auto; }
+.cs-bulk-label { display: block; font-weight: 600; margin: 8px 0 4px; }
+.cs-bulk-textarea { width: 100%; min-height: 100px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px; }
+
+@media (max-width: 1024px) { .class-schedule-admin .cs-list { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { 
+  .class-schedule-admin .cs-list { grid-template-columns: 1fr; } 
+  .class-schedule-admin .cs-form { grid-template-columns: 1fr; }
+  .cs-location-form { grid-template-columns: 1fr; }
+}
 
 
