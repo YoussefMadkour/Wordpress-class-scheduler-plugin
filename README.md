@@ -1,37 +1,84 @@
-# Class Schedule WordPress Plugin
+# ZakFit Class Schedule - WordPress Plugin
+
+> **Complete WordPress Development Environment + Plugin**
+> 
+> This repository contains a full WordPress development setup with the Class Schedule plugin pre-installed and configured. Clone, run, and see it working immediately!
 
 A dynamic, responsive WordPress plugin for displaying weekly class schedules with a modern grid layout. Perfect for gyms, fitness centers, educational institutions, and any organization that needs to showcase their weekly programs.
+
+![Class Schedule Grid View](Schedule_2.png)
+*Desktop grid view with location switching*
+
+![Admin Interface](Admin_Image.png)
+*Admin interface with bulk import and streamlined editing*
+
+## 🏗️ **Repository Structure**
+
+```
+zakfit/
+├── 🔧 docker-compose.yml           # WordPress + MySQL setup
+├── 🔧 README-LOCAL-DEV.md          # Development guide
+├── 📦 wp-content/plugins/class-schedule/  # ← THE PLUGIN
+│   ├── class-schedule.php          # Main plugin file
+│   ├── build/                      # Production assets
+│   │   ├── admin.js               # Admin interface
+│   │   ├── public.js              # Frontend renderer
+│   │   └── *.css                  # Styling
+│   └── src/                       # Source files
+└── 🌐 wp-content/                  # Full WordPress environment
+```
+
+**Two ways to use this repo:**
+1. **🚀 Full Development** - Clone and run the complete WordPress environment
+2. **📦 Plugin Only** - Extract `/wp-content/plugins/class-schedule/` for your site
 
 ## ✨ Features
 
 - **📅 Dynamic Schedule Management** - Add, edit, and delete classes through WordPress admin
-- **🎨 Modern Grid Layout** - Clean, professional design with time slots and day columns
+- **🎨 Modern Grid Layout** - Clean, professional design with time slots and day columns  
 - **📱 Fully Responsive** - Desktop grid view, mobile-friendly vertical layout
+- **🔄 Location Switching** - Multiple gym locations with navigation arrows
+- **📊 Bulk Import** - CSV import for locations and classes
+- **✏️ Inline Editing** - Streamlined admin interface with filters and search
 - **🔧 Easy Integration** - Simple shortcode `[class_schedule]` or Gutenberg block
 - **⚡ Fast & Lightweight** - Vanilla JavaScript, no external dependencies
-- **🎯 Developer Friendly** - Clean code structure, customizable styles
 
 ## 🚀 Quick Start
 
-### Installation
+### Option 1: Full Development Environment (Recommended)
 
-1. **Upload Plugin:**
+1. **Clone & Run:**
    ```bash
-   # Download and extract to wp-content/plugins/
-   wp-content/plugins/class-schedule/
+   git clone https://github.com/yourusername/zakfit.git
+   cd zakfit
+   docker-compose up -d
    ```
 
-2. **Activate Plugin:**
-   - Go to WordPress Admin → Plugins
-   - Find "Class Schedule" and click Activate
+2. **Access WordPress:**
+   - Frontend: http://localhost:8080
+   - Admin: http://localhost:8080/wp-admin
+   - Plugin is pre-installed and ready!
 
-3. **Add Classes:**
-   - Navigate to admin menu → "Class Schedule"
-   - Use the form to add your classes with times and instructors
+3. **View Working Example:**
+   - Schedule already populated with sample data
+   - Test admin interface at "Class Schedule" menu
+   - See frontend at any page with `[class_schedule]` shortcode
 
-4. **Display Schedule:**
-   - Add `[class_schedule]` shortcode to any page/post
-   - Or use the "Class Schedule" Gutenberg block
+### Option 2: Plugin Only Installation
+
+1. **Extract Plugin:**
+   ```bash
+   # Copy just the plugin folder to your WordPress
+   cp -r wp-content/plugins/class-schedule/ /your-wordpress/wp-content/plugins/
+   ```
+
+2. **Or Download Zip:**
+   - Download `class-schedule-plugin.zip` from releases
+   - Upload via WordPress Admin → Plugins → Add New → Upload
+
+3. **Activate & Configure:**
+   - Go to WordPress Admin → Plugins → Activate "Class Schedule"
+   - Navigate to "Class Schedule" menu to add your data
 
 ## 📖 Usage
 
@@ -95,22 +142,26 @@ const slots = [
 
 ### File Structure
 ```
-class-schedule/
-├── class-schedule.php          # Main plugin file
-├── uninstall.php              # Cleanup on uninstall
-├── build/                     # Production assets
-│   ├── admin.js              # Admin interface
-│   ├── admin.css             # Admin styles
-│   ├── public.js             # Frontend renderer
-│   ├── public.css            # Frontend styles
-│   ├── block.js              # Gutenberg block
-│   └── block.css             # Block editor styles
-├── src/                      # Source files (optional React/TS build)
-│   ├── admin/                # Admin React components
-│   ├── public/               # Frontend components
-│   ├── styles/               # Source CSS
-│   └── shared/               # Shared types/utilities
-└── includes/                 # PHP helper classes (future)
+zakfit/                              # ← This repository
+├── docker-compose.yml              # Local WordPress environment
+├── README.md                       # This file
+├── README-LOCAL-DEV.md             # Development guide
+├── *.png                           # Screenshots
+├── wp-content/
+│   ├── plugins/
+│   │   └── class-schedule/         # ← THE PLUGIN
+│   │       ├── class-schedule.php  # Main plugin file
+│   │       ├── build/              # Production assets
+│   │       │   ├── admin.js       # Admin UI (filters, inline edit)
+│   │       │   ├── admin.css      # Admin styles
+│   │       │   ├── public.js      # Frontend renderer
+│   │       │   ├── public.css     # Frontend styles
+│   │       │   ├── block.js       # Gutenberg block
+│   │       │   └── block.css      # Block editor styles
+│   │       └── src/               # Source files (TypeScript/React ready)
+│   ├── themes/                    # WordPress themes
+│   └── uploads/                   # Media files
+└── Full WordPress installation    # Complete WP environment
 ```
 
 ### Build Process (Optional)
