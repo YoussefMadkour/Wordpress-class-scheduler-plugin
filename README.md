@@ -12,6 +12,7 @@ A dynamic, responsive WordPress plugin for displaying weekly class schedules wit
 ![Admin Interface](Admin_Image.png)
 *Admin interface with bulk import and streamlined editing*
 
+![CRUD for Classes](CRUD_Image.png)
 ## 🏗️ **Repository Structure**
 
 ```
@@ -29,19 +30,19 @@ zakfit/
 ```
 
 **Two ways to use this repo:**
-1. **🚀 Full Development** - Clone and run the complete WordPress environment
-2. **📦 Plugin Only** - Extract `/wp-content/plugins/class-schedule/` for your site
+1. **Full Development** - Clone and run the complete WordPress environment
+2. **Plugin Only** - Extract `/wp-content/plugins/class-schedule/` for your site
 
 ## ✨ Features
 
-- **📅 Dynamic Schedule Management** - Add, edit, and delete classes through WordPress admin
-- **🎨 Modern Grid Layout** - Clean, professional design with time slots and day columns  
-- **📱 Fully Responsive** - Desktop grid view, mobile-friendly vertical layout
-- **🔄 Location Switching** - Multiple gym locations with navigation arrows
-- **📊 Bulk Import** - CSV import for locations and classes
-- **✏️ Inline Editing** - Streamlined admin interface with filters and search
-- **🔧 Easy Integration** - Simple shortcode `[class_schedule]` or Gutenberg block
-- **⚡ Fast & Lightweight** - Vanilla JavaScript, no external dependencies
+- **Dynamic Schedule Management** - Add, edit, and delete classes through WordPress admin
+- **Modern Grid Layout** - Clean, professional design with time slots and day columns  
+- **Fully Responsive** - Desktop grid view, mobile-friendly vertical layout
+- **Location Switching** - Multiple gym locations with navigation arrows
+- **Bulk Import** - CSV import for locations and classes
+- **Inline Editing** - Streamlined admin interface with filters and search
+- **Easy Integration** - Simple shortcode `[class_schedule]` or Gutenberg block
+- **Fast & Lightweight** - Vanilla JavaScript, no external dependencies
 
 ## 🚀 Quick Start
 
@@ -229,4 +230,4 @@ This project is licensed under the GPL v2 or later - see the [LICENSE](LICENSE) 
 
 ---
 
-**Made with ❤️ for the WordPress community**
+**Made by Youssef Madkour with ❤️ for the WordPress community**
