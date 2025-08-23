@@ -8,6 +8,15 @@
 .class-schedule-admin .cs-item-location { color: #059669; font-size: 11px; font-weight: 600; }
 .class-schedule-admin .cs-actions { display: flex; gap: 6px; margin-top: 6px; }
 
+/* Add Class Section */
+.cs-add-class-section { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 16px 0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+.cs-section-title { margin: 0 0 16px 0; color: #374151; font-size: 18px; font-weight: 600; border-bottom: 2px solid #f3f4f6; padding-bottom: 8px; }
+.cs-add-class-section .cs-form { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; }
+.cs-add-class-section .cs-form input, .cs-add-class-section .cs-form select { border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 12px; }
+.cs-add-class-section .cs-form input:focus, .cs-add-class-section .cs-form select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+.cs-add-btn { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+.cs-add-btn:hover { background: #2563eb; }
+
 /* Location Manager */
 .cs-location-manager { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
 .cs-location-manager h3 { margin: 0 0 12px 0; color: #374151; }
@@ -24,6 +33,10 @@
 /* Bulk Import */
 .cs-bulk-import { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 16px 0; }
 .cs-bulk-import h3 { margin: 0 0 12px 0; }
+.cs-bulk-header { cursor: pointer; user-select: none; position: relative; }
+.cs-bulk-header:hover { color: #3b82f6; }
+.cs-bulk-header::after { content: '▼'; position: absolute; right: 0; font-size: 12px; color: #6b7280; }
+.cs-bulk-import.collapsed .cs-bulk-header::after { content: '▶'; }
 .cs-bulk-help { font-size: 12px; color: #475569; margin-bottom: 12px; }
 .cs-bulk-help pre { background: #f8fafc; padding: 8px; overflow: auto; }
 .cs-bulk-label { display: block; font-weight: 600; margin: 8px 0 4px; }

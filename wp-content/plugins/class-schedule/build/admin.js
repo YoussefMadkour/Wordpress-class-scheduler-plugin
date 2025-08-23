@@ -40,6 +40,7 @@
   let editingLocationId = null;
   let filters = { location: '', day: '', query: '' };
   const collapsedDays = new Set();
+  const collapsedSections = new Set(['bulk-import']); // Start with bulk import collapsed
 
   function renderToolbar(){
     const bar = h('div', { class: 'cs-toolbar' });
@@ -75,7 +76,26 @@
 
   function renderBulkImport() {
     const section = h('div', { class: 'cs-bulk-import' });
-    section.appendChild(h('h3', { text: 'Bulk Import' }));
+    const header = h('h3', { text: 'Bulk Import', class: 'cs-bulk-header' });
+    const isCollapsed = collapsedSections.has('bulk-import');
+    
+    header.style.cursor = 'pointer';
+    header.addEventListener('click', () => {
+      if (collapsedSections.has('bulk-import')) {
+        collapsedSections.delete('bulk-import');
+      } else {
+        collapsedSections.add('bulk-import');
+      }
+      render();
+    });
+    
+    if (isCollapsed) {
+      header.textContent = 'Bulk Import (Click to expand)';
+      section.appendChild(header);
+      return section;
+    }
+    
+    section.appendChild(header);
 
     const helper = h('div', { class: 'cs-bulk-help' }, [
       h('div', { text: 'Paste CSV (one item per line). Examples:' }),
@@ -299,6 +319,11 @@
 
   function render(){
     root.innerHTML = '';
+    
+    // Add Class Form Section
+    const addClassSection = h('div', { class: 'cs-add-class-section' });
+    addClassSection.appendChild(h('h3', { text: 'Add New Class', class: 'cs-section-title' }));
+    
     const form = h('form', { class: 'cs-form' });
     const inputTitle = h('input', { placeholder: 'Class title', required: 'true' });
     const inputInstructor = h('input', { placeholder: 'Instructor (optional)' });
@@ -309,7 +334,7 @@
     locations.forEach(loc => selectLocation.appendChild(h('option', {value: loc.id, text: loc.name})));
     const inputStart = h('input', { type: 'time', value: '06:00' });
     const inputEnd = h('input', { type: 'time', value: '08:00' });
-    const btnAdd = h('button', { type: 'submit', text: 'Add Class' });
+    const btnAdd = h('button', { type: 'submit', text: 'Add Class', class: 'cs-add-btn' });
     [inputTitle, inputInstructor, selectDay, selectLocation, inputStart, inputEnd, btnAdd].forEach(el => form.appendChild(el));
     form.addEventListener('submit', function(e){
       e.preventDefault();
@@ -319,6 +344,8 @@
       saveSchedule(items).then(()=>render());
       form.reset();
     });
+    
+    addClassSection.appendChild(form);
 
     const list = h('div', { class: 'cs-list' });
     const byDay = { mon:[],tue:[],wed:[],thu:[],fri:[],sat:[],sun:[] };
@@ -423,9 +450,9 @@
     });
 
     root.appendChild(renderLocationManager());
+    root.appendChild(addClassSection);
     root.appendChild(renderToolbar());
     root.appendChild(renderBulkImport());
-    root.appendChild(form);
     root.appendChild(list);
   }
 

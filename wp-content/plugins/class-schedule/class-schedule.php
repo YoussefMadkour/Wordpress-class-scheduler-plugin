@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Class Schedule
  * Description: Dynamic weekly class schedule with admin CRUD and shortcode/block renderer.
- * Version: 0.2.1
+ * Version: 0.2.3
  * Author: ZakFit
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-define('CLASS_SCHEDULE_VERSION', '0.2.1');
+define('CLASS_SCHEDULE_VERSION', '0.2.3');
 define('CLASS_SCHEDULE_PLUGIN_FILE', __FILE__);
 define('CLASS_SCHEDULE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('CLASS_SCHEDULE_PLUGIN_URL', plugin_dir_url(__FILE__));
