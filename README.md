@@ -8,7 +8,7 @@ A dynamic, responsive WordPress plugin for displaying weekly class schedules wit
 <table>
   <tr>
     <td align="center">
-      <img src="Schedule_2.png" alt="Class Schedule Grid View" width="400"><br>
+      <img src="Schedule_2.png" alt="Class Schedule Grid View" width="600"><br>
       <em>Desktop grid view with location switching</em>
     </td>
     <td align="center">
