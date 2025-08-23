@@ -10,6 +10,9 @@ A dynamic, responsive WordPress plugin for displaying weekly class schedules wit
 *Desktop grid view with location switching*
 
 ![Mobile Interface](mobile_scheduler.png)
+
+<img src="mobile_scheduler.png" alt="Mobile Interface" width="300">
+
 *Mobile view with location switching*
 
 ![Admin Interface](Admin_Image.png)
