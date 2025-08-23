@@ -14,6 +14,10 @@
 .cs-location-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 16px; }
 .cs-locations-list { display: grid; gap: 8px; }
 .cs-location-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #fff; border-radius: 4px; }
+.cs-location-item.cs-location-editing { background: #f8fafc; border: 1px dashed #cbd5e1; flex-direction: column; align-items: stretch; }
+.cs-location-item.cs-location-editing input { margin: 4px 0; padding: 6px 8px; }
+.cs-location-name { font-weight: 600; }
+.cs-location-slug { color: #64748b; font-size: 12px; }
 .cs-location-actions { display: flex; gap: 6px; }
 .cs-location-actions button { padding: 4px 8px; font-size: 12px; }
 
@@ -23,6 +27,7 @@
 .cs-bulk-help { font-size: 12px; color: #475569; margin-bottom: 12px; }
 .cs-bulk-help pre { background: #f8fafc; padding: 8px; overflow: auto; }
 .cs-bulk-label { display: block; font-weight: 600; margin: 8px 0 4px; }
+.cs-bulk-file { margin: 4px 0 8px; padding: 6px; border: 1px solid #e5e7eb; border-radius: 4px; width: 100%; }
 .cs-bulk-textarea { width: 100%; min-height: 100px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px; }
 
 /* Toolbar */

@@ -89,9 +89,34 @@
     ]);
 
     const locLabel = h('label', { class: 'cs-bulk-label', text: 'Locations CSV' });
+    const locFileInput = h('input', { type: 'file', accept: '.csv,.txt', class: 'cs-bulk-file' });
     const locArea = h('textarea', { class: 'cs-bulk-textarea', placeholder: 'name,slug' });
+    
+    locFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          locArea.value = e.target.result;
+        };
+        reader.readAsText(file);
+      }
+    });
+    
     const clsLabel = h('label', { class: 'cs-bulk-label', text: 'Classes CSV' });
+    const clsFileInput = h('input', { type: 'file', accept: '.csv,.txt', class: 'cs-bulk-file' });
     const clsArea = h('textarea', { class: 'cs-bulk-textarea', placeholder: 'title,instructor,day,locationId,start,end' });
+    
+    clsFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          clsArea.value = e.target.result;
+        };
+        reader.readAsText(file);
+      }
+    });
     const importBtn = h('button', { type: 'button', text: 'Import' });
 
     importBtn.addEventListener('click', () => {
@@ -153,8 +178,10 @@
 
     section.appendChild(helper);
     section.appendChild(locLabel);
+    section.appendChild(locFileInput);
     section.appendChild(locArea);
     section.appendChild(clsLabel);
+    section.appendChild(clsFileInput);
     section.appendChild(clsArea);
     section.appendChild(importBtn);
     return section;
@@ -189,38 +216,70 @@
     
     const locationsList = h('div', { class: 'cs-locations-list' });
     locations.forEach(loc => {
-      const item = h('div', { class: 'cs-location-item' });
-      item.appendChild(h('span', { text: loc.name + ' (' + loc.id + ')' }));
+      const isEditing = editingLocationId === loc.id;
+      const item = h('div', { class: 'cs-location-item' + (isEditing ? ' cs-location-editing' : '') });
       
-      const actions = h('div', { class: 'cs-location-actions' });
+      if (!isEditing) {
+        item.appendChild(h('div', { class: 'cs-location-name', text: loc.name }));
+        item.appendChild(h('div', { class: 'cs-location-slug', text: '(' + loc.id + ')' }));
+        
+        const actions = h('div', { class: 'cs-location-actions' });
+        
+        const btnEdit = h('button', { type: 'button', text: 'Edit' });
+        btnEdit.addEventListener('click', () => {
+          editingLocationId = loc.id;
+          render();
+        });
+        
+        const btnDelete = h('button', { type: 'button', text: 'Delete' });
+        btnDelete.addEventListener('click', () => {
+          if (confirm('Are you sure you want to delete this location? All classes assigned to this location will remain but may not display correctly.')) {
+            locations = locations.filter(l => l.id !== loc.id);
+            saveLocations(locations).then(() => render());
+          }
+        });
+        
+        actions.appendChild(btnEdit);
+        actions.appendChild(btnDelete);
+        item.appendChild(actions);
+      } else {
+        const nameInput = h('input', { value: loc.name, placeholder: 'Location name' });
+        const slugInput = h('input', { value: loc.slug, placeholder: 'location-slug' });
+        
+        const actions = h('div', { class: 'cs-location-actions' });
+        const saveBtn = h('button', { type: 'button', text: 'Save' });
+        const cancelBtn = h('button', { type: 'button', text: 'Cancel' });
+        
+        saveBtn.addEventListener('click', () => {
+          const newName = nameInput.value.trim();
+          const newSlug = slugInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+          
+          if (newName && newSlug) {
+            const updatedLocation = {
+              ...loc,
+              name: newName,
+              slug: newSlug,
+              id: newSlug
+            };
+            locations = locations.map(l => l.id === loc.id ? updatedLocation : l);
+            editingLocationId = null;
+            saveLocations(locations).then(() => render());
+          }
+        });
+        
+        cancelBtn.addEventListener('click', () => {
+          editingLocationId = null;
+          render();
+        });
+        
+        actions.appendChild(saveBtn);
+        actions.appendChild(cancelBtn);
+        
+        item.appendChild(nameInput);
+        item.appendChild(slugInput);
+        item.appendChild(actions);
+      }
       
-      const btnEdit = h('button', { type: 'button', text: 'Edit' });
-      btnEdit.addEventListener('click', () => {
-        const newName = prompt('Location name:', loc.name);
-        const newSlug = prompt('Location slug:', loc.slug);
-        if (newName && newSlug) {
-          const updatedLocation = {
-            ...loc,
-            name: newName.trim(),
-            slug: newSlug.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
-            id: newSlug.toLowerCase().replace(/[^a-z0-9-]/g, '-')
-          };
-          locations = locations.map(l => l.id === loc.id ? updatedLocation : l);
-          saveLocations(locations).then(() => render());
-        }
-      });
-      
-      const btnDelete = h('button', { type: 'button', text: 'Delete' });
-      btnDelete.addEventListener('click', () => {
-        if (confirm('Are you sure you want to delete this location? All classes assigned to this location will remain but may not display correctly.')) {
-          locations = locations.filter(l => l.id !== loc.id);
-          saveLocations(locations).then(() => render());
-        }
-      });
-      
-      actions.appendChild(btnEdit);
-      actions.appendChild(btnDelete);
-      item.appendChild(actions);
       locationsList.appendChild(item);
     });
     
