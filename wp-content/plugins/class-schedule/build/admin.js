@@ -37,6 +37,7 @@
   let items = [];
   let locations = [];
   let editingId = null;
+  let editingLocationId = null;
   let filters = { location: '', day: '', query: '' };
   const collapsedDays = new Set();
 

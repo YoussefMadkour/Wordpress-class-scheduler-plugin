@@ -84,45 +84,91 @@ zakfit/
 ## 📖 Usage
 
 ### Admin Interface
+
+#### ➕ **Adding Classes**
 - **Class Title:** Name of the class (e.g., "BOXING", "CARDIO")
-- **Instructor:** Teacher/trainer name
+- **Instructor:** Teacher/trainer name (optional - can be left empty)
 - **Day:** Monday through Sunday
-- **Start/End Time:** Class duration (2-hour slots recommended)
+- **Location:** Select from configured gym locations
+- **Start/End Time:** Class duration (supports evening classes 6PM-10PM)
+
+#### 🏢 **Managing Locations**
+- **Add Location:** Name and URL-friendly slug (e.g., "main-gym")
+- **Edit Location:** Click "Edit" to modify name/slug
+- **Delete Location:** Remove unused locations
+
+#### 📊 **Bulk Import (CSV)**
+- **Locations CSV:** Format: `name,slug`
+  ```
+  Main Gym,main-gym
+  Studio A,studio-a
+  ```
+- **Classes CSV:** Format: `title,instructor,day,locationId,start,end`
+  ```
+  BOXING,John Smith,mon,main-gym,18:00,19:00
+  YOGA,,tue,studio-a,19:00,20:00
+  ```
+
+#### ✏️ **Inline Editing**
+- **Edit Class:** Click "Edit" to modify all fields inline
+- **Duplicate Class:** Copy existing class to create similar ones
+- **Change Day:** Edit day with validation
+- **Filters:** Filter by day, location, or search by title/instructor
 
 ### Frontend Display
-- **Desktop:** Full grid with time slots (06:00-20:00) and day columns
-- **Mobile:** Vertical list grouped by day for better readability
+- **Desktop:** Full grid with time slots (6AM-10PM) and day columns
+- **Mobile:** Vertical list grouped by day with time display
+- **Location Switching:** Navigation arrows to switch between gym locations
+- **12-Hour Format:** Times displayed as 6:00 PM instead of 18:00
 - **Responsive:** Automatically adapts to screen size
 
 ### Shortcode Options
 ```php
-[class_schedule]  // Basic usage
+[class_schedule]                    // Shows all locations (with navigation)
+[class_schedule location="main-gym"] // Shows specific location only
 ```
 
 ### Gutenberg Block
-Search for "Class Schedule" in the block inserter and add to your page.
+Search for "Class Schedule" in the block inserter and add to your page. Supports the same location parameter.
 
 ## 🎨 Customization
 
 ### Custom Styling
-The plugin uses CSS custom properties for easy theming:
+The plugin uses a dark theme with orange accents (JAB CLUB style):
 
 ```css
 .class-schedule-wrapper {
-  --primary-bg: #0b1426;
-  --tile-bg: #d4af7a;
-  --text-primary: #ffffff;
-  --text-secondary: #e2e8f0;
+  --primary-bg: #0a0a0a;        /* Dark background */
+  --secondary-bg: #161616;      /* Card backgrounds */
+  --accent-orange: #F27C00;     /* Primary orange */
+  --accent-light: #FBA743;      /* Light orange */
+  --text-primary: #EDE2D0;      /* Light text */
+  --text-secondary: #B2ACA8;    /* Muted text */
+}
+
+/* Orange tiles with no rounded corners */
+.cs-tile {
+  background: #F27C00;
+  border-radius: 0;
+  color: #ffffff;
 }
 ```
 
+### Typography
+- **Headers:** Anton font family (Google Fonts)
+- **Body:** Roboto font family (Google Fonts)  
+- **Times:** 12-hour format (6:00 PM instead of 18:00)
+
 ### Modify Time Slots
-Edit the time slots in `/src/public/index.tsx` or `/build/public.js`:
+Edit the time slots in `/build/public.js` to extend hours:
 
 ```javascript
 const slots = [
-  {start:'06:00', end:'08:00', label:'06.00 - 08.00'},
-  {start:'08:00', end:'10:00', label:'08.00 - 10.00'},
+  {start:'06:00', end:'08:00', label:'6:00 AM - 8:00 AM'},
+  {start:'18:00', end:'19:00', label:'6:00 PM - 7:00 PM'},
+  {start:'19:00', end:'20:00', label:'7:00 PM - 8:00 PM'},
+  {start:'20:00', end:'21:00', label:'8:00 PM - 9:00 PM'},
+  {start:'21:00', end:'22:00', label:'9:00 PM - 10:00 PM'},
   // Add more slots...
 ];
 ```
@@ -176,33 +222,53 @@ npm run build  # Compiles src/ to build/
 ## 🔧 Technical Details
 
 ### Database Storage
-- Classes stored as JSON in WordPress options table
-- Option key: `class_schedule_data`
-- No custom tables required
+- **Classes:** JSON in WordPress options table (`class_schedule_data`)
+- **Locations:** JSON in WordPress options table (`class_schedule_locations`)
+- **No custom tables required** - Uses WordPress options API
+- **Cache-busting:** Asset versions use `filemtime()` for fresh updates
 
 ### REST API
-- `GET /wp-json/class-schedule/v1/schedule` - Fetch classes
-- `POST /wp-json/class-schedule/v1/schedule` - Update classes (admin only)
+```php
+// Get all classes
+GET /wp-json/class-schedule/v1/schedule
+
+// Get classes for specific location  
+GET /wp-json/class-schedule/v1/schedule?location=main-gym
+
+// Update classes (admin only)
+POST /wp-json/class-schedule/v1/schedule
+Body: {"classes": [...]}
+
+// Get all locations
+GET /wp-json/class-schedule/v1/locations
+
+// Update locations (admin only)  
+POST /wp-json/class-schedule/v1/locations
+Body: {"locations": [...]}
+```
 
 ### WordPress Hooks
-- `register_activation_hook` - Initialize database option
-- `add_action('admin_menu')` - Register admin page
-- `add_action('wp_enqueue_scripts')` - Load frontend assets
-- `add_action('rest_api_init')` - Register API endpoints
-- `add_shortcode('class_schedule')` - Register shortcode
+- `register_activation_hook` - Initialize database options with default data
+- `add_action('admin_menu')` - Register admin page ("Class Schedule")
+- `add_action('admin_enqueue_scripts')` - Load admin assets with cache-busting
+- `add_action('wp_enqueue_scripts')` - Load frontend assets with cache-busting
+- `add_action('rest_api_init')` - Register API endpoints for classes and locations
+- `add_shortcode('class_schedule')` - Register shortcode with location parameter
+- `register_block_type` - Register Gutenberg block
 
 ## 📱 Responsive Breakpoints
 
-- **Desktop (>768px):** Full grid layout with horizontal scroll if needed
-- **Mobile (≤768px):** Vertical list layout grouped by day
+- **Desktop (>768px):** Full grid layout with location navigation
+- **Mobile (≤768px):** Vertical list layout grouped by day with times in cards
 
 ## 🎯 Use Cases
 
-- **Fitness Centers:** Weekly class schedules
-- **Educational Institutions:** Course timetables
-- **Community Centers:** Program schedules
-- **Studios:** Workshop calendars
-- **Clinics:** Appointment slots
+- **Multi-Location Gyms:** Different schedules per location (ZakFit, EdgeFit)
+- **Fitness Centers:** Weekly class schedules with instructors
+- **Martial Arts Schools:** Kids, teens, and adult programs
+- **Educational Institutions:** Course timetables across campuses
+- **Community Centers:** Program schedules by facility
+- **Studios:** Workshop calendars with multiple rooms
 
 ## 🤝 Contributing
 
