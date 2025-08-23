@@ -5,7 +5,7 @@
 > This repository contains a full WordPress development setup with the Class Schedule plugin pre-installed and configured. Clone, run, and see it working immediately!
 
 A dynamic, responsive WordPress plugin for displaying weekly class schedules with a modern grid layout. Perfect for gyms, fitness centers, educational institutions, and any organization that needs to showcase their weekly programs.
-<div style="display: flex; justify-content: center; gap: 20px;">
+<<div style="display: flex; justify-content: center; gap: 20px;">
   <div>
     <img src="Schedule_2.png" alt="Class Schedule Grid View" width="400">
     <p align="center"><em>Desktop grid view with location switching</em></p>
